@@ -1,0 +1,12 @@
+{
+  "cloudant_apikey": "QP-ZDetiFR_v4CDi8TJprabsIWzX4kr_8Dg4lvLjAOdD",
+  "cloudant_host": "ff263308-fa2d-4b8c-9849-4bd35ff822ff-bluemix.cloudant.com",
+  "cloudant_iam_apikey_description": "Auto generated apikey during resource-key operation for Instance - crn:v1:bluemix:public:cloudantnosqldb:us-east:a/da5a4e031180418297c5c49ed0f4abf9:a3e14422-837c-41c6-9b21-2507ceb57423::",
+  "cloudant_iam_apikey_name": "auto-generated-apikey-f0226fe1-1aa4-419d-b9a0-ca9e638cb887",
+  "cloudant_iam_role_crn": "crn:v1:bluemix:public:iam::::serviceRole:Writer",
+  "cloudant_iam_serviceid_crn": "crn:v1:bluemix:public:iam-identity::a/da5a4e031180418297c5c49ed0f4abf9::serviceid:ServiceId-0d1c4da7-e5f3-4507-90d8-1482d69cb068",
+  "cloudant_password": "4aca1c8f1471a9ea509634e03d40b5c13abac7740edfb70a11f76fb196d3fccb",
+  "cloudant_port": 443,
+  "cloudant_url": "https://ff263308-fa2d-4b8c-9849-4bd35ff822ff-bluemix:4aca1c8f1471a9ea509634e03d40b5c13abac7740edfb70a11f76fb196d3fccb@ff263308-fa2d-4b8c-9849-4bd35ff822ff-bluemix.cloudant.com",
+  "cloudant_username": "ff263308-fa2d-4b8c-9849-4bd35ff822ff-bluemix"
+}
