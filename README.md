@@ -1,6 +1,6 @@
 ## ChatRoom
 
-Basic Web project with ExpressJS on NodeJS
+A web chat room  running a Node.js server in bluemix. The backend has been implemented with Express and Socket.io.
 
 
 The link to the app is http://chat-room.mybluemix.net/ 
