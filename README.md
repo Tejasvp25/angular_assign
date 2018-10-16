@@ -12,7 +12,7 @@ The link to the app is http://chat-room.mybluemix.net/
 
 ### To run the app locally:
 
-+ Clone the repository
++ Clone or download the repository
 + Navigate to the project folder
 + run "npm install" in bash or command prompt
 + Fire up the server by running "node server" in command prompt
