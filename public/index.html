@@ -952,12 +952,20 @@ socket.on('getUsers', d=>{
 
 socket.on('serverMsg', message => receiveMessage(message))
 
-socket.on('chatHist', data => {
-  console.log(data)
-  console.log("MsgCount : "+data.msgCount)
-  for (var i=1;i<=data.msgCount;i++){
-    receiveMessage([data.messages[i],data.messagesUserName[i]])
-    // console.log(data.messages[i])
+// socket.on('chatHist', data => {
+//   console.log(data)
+//   console.log("MsgCount : "+data.msgCount)
+//   for (var i=0;i<data.msgCount;i++){
+//     receiveMessage([data.messages[i].data,data.messagesUserName[i].userName])
+//     // console.log(data.messages[i])
+//   }
+// })
+fetch('/getChatHist')
+.then(response => response.json())
+.then(response => {
+
+  for (var i in response.messages){
+    receiveMessage([response.messages[i].data,response.messages[i].userName])
   }
 })
 
