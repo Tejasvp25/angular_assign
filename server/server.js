@@ -10,14 +10,14 @@
 const appName = require('./../package').name;
 const log4js = require('log4js');
 const localConfig = require('./config/local.json');
-var fs = require('fs')
+var path = require('path')
 var socketManager = require('./controllers/socketManagerNew')
 
 const logger = log4js.getLogger(appName);
 
 const app = require('./config/headers').app
 const server = require('./config/headers').server
-var io = require('./config/headers').io
+// var io = require('./config/headers').io
 
 
 var mongoose = require('mongoose')

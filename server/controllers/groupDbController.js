@@ -14,6 +14,16 @@ exports.getAllInfo = (req,res) => {
     })
 }
 
+exports.getNumUsers = (req,res) => {
+    groupRoom.findById(req.params.groupId, {usersInGroup : 1}, (err,data) => {
+        if (err){
+            console.log(err)
+            res.send(err)
+        }
+        res.json(data)
+    })
+}
+
 exports.addNewGroup = (res,req) => {
     new_grp = groupRoom({"groupName": res.params.grpName, "messages": []})
     new_grp.save((err,res) => {
