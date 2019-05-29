@@ -1,5 +1,5 @@
 var mongoose = require('mongoose');
-var chatRoomSchema = require('../models/globalRoomSchema')
+var chatRoomSchema = require('../models/RoomsSchema')
 
 var groupRoomSchema = chatRoomSchema.groupRoom;
 var groupRoom = mongoose.model('groups',groupRoomSchema)

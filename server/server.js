@@ -9,14 +9,15 @@
 // require('appmetrics-prometheus').attach();
 const appName = require('./../package').name;
 const log4js = require('log4js');
-const localConfig = require('./config/local.json');
+
 var path = require('path')
-var socketManager = require('./controllers/socketManagerNew')
+var socketManager = require('./controllers/SocketController')
 
 const logger = log4js.getLogger(appName);
 
 const app = require('./config/headers').app
 const server = require('./config/headers').server
+const localConfig = require('./config/headers').localConfig;
 // var io = require('./config/headers').io
 
 
@@ -31,7 +32,6 @@ const serviceManager = require('./services/service-manager');
 require('./services/index')(app);
 require('./routers/index')(app, server);
 require('./routers/routes')(app);
-// Add your code here
 
 const port = process.env.PORT || localConfig.port;
 server.listen(port, function(){

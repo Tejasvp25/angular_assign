@@ -1,4 +1,5 @@
 var mongoose = require('mongoose')
+const uuidv1 = require('uuid/v1');
 
 const Schema = mongoose.Schema;
 
@@ -21,11 +22,15 @@ exports.groupRoom = new Schema({
     groupName: {
         type: String
     },
+    groupId:{
+        type: String,
+        default: uuidv1()
+    },
     activeUserIdCount: {
         type: Number,
         default: 0
     },
-    usersInGroup: {
+    totalUsersInGroup: {
         type: Number,
         default: 1
     },
