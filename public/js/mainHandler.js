@@ -14,7 +14,7 @@ try {
 
     emitChangeGroup(grpName)
     
-    socket = io(`/${grpName}`)
+    // socket = io(`/${grpName}`)
 } catch (error) { }
 
 fetch('/getChatHist')

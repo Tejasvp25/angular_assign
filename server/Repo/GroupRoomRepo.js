@@ -27,19 +27,13 @@ let numMessages;
 
 //#region ---------------- Create ---------------------//
 exports.createNewGroup = async (groupName) => {
+    res = new ResAPI();
+
     new_grp = new groupRoom({
         "groupName": groupName
     })
-    new_grp.save((err, res) => {
-        if (err){
-            console.log(err);
-            res.retcode = APIReturnEnum.ErrorOccured;
-            res.object = false;
-        }
-        console.log("Group added successfully!")
-        res.retCode = APIReturnEnum.Successful;
-        res.object = true;
-    })
+
+    return new_grp.save()
 }
 
 exports.createNewMessage = async (msg, userName) => {
@@ -52,7 +46,7 @@ exports.createNewMessage = async (msg, userName) => {
 
     // If the number of message(s) is 1, then create the global room
     if (numMessages === 1) {
-        main = new globRoom({ "userIdCount": 1, "msgCount": 1, "messages": [{ "userName": userName, "data": msg }] })
+        main = new groupRoom({ "userIdCount": 1, "msgCount": 1, "messages": [{ "userName": userName, "data": msg }] })
         main.save((err, res) => {
             if (err) {
                 console.log(err)
@@ -68,7 +62,7 @@ exports.createNewMessage = async (msg, userName) => {
     }
 
     // Push new messages
-    globRoom.findOneAndUpdate({}, {
+    groupRoom.findOneAndUpdate({}, {
         $addToSet:
         {
             "messages": {
@@ -93,7 +87,7 @@ exports.createNewMessage = async (msg, userName) => {
 
 //#region ---------------- Load ---------------------//
 exports.loadChatHist = async () => {
-    return await globRoom.find({}, (err, data) => {
+    return await groupRoom.find({}, (err, data) => {
         if (err) {
             console.log(err);
             return;
@@ -103,7 +97,7 @@ exports.loadChatHist = async () => {
 }
 
 exports.loadNumUsers = async () => {
-    return await globRoom.find({}, { userIdCount: 1 }, (err, data) => {
+    return await groupRoom.find({}, { userIdCount: 1 }, (err, data) => {
         if (err) {
             console.log(err)
             return;
@@ -113,7 +107,7 @@ exports.loadNumUsers = async () => {
 }
 
 loadNumMsgs = async () => {
-    return await globRoom.find({}, { msgCount: 1 }, (err, data) => {
+    return await groupRoom.find({}, { msgCount: 1 }, (err, data) => {
         if (err) {
             console.log(err);
             return;
@@ -127,7 +121,7 @@ loadNumMsgs = async () => {
 exports.loadNumMsgs = loadNumMsgs;
 
 exports.loadAllMessages = async () => {
-    await globRoom.find({}, { messages: 1 }, (err, data) => {
+    await groupRoom.find({}, { messages: 1 }, (err, data) => {
         if (err) {
             console.log(err);
             return;
@@ -141,7 +135,7 @@ exports.loadAllMessages = async () => {
 
 //Updates user count and returns the updated count
 exports.updateUserCount = async (data) => {
-    return await globRoom.findOneAndUpdate(
+    return await groupRoom.findOneAndUpdate(
         {},
         { userIdCount: data },
         { new: true, projection: { userIdCount: 1 } },
@@ -156,7 +150,7 @@ exports.updateUserCount = async (data) => {
 
 //Updates message count and returns the updated count
 updateMsgCount = async (data) => {
-    return await globRoom.findOneAndUpdate(
+    return await groupRoom.findOneAndUpdate(
         {},
         { msgCount: data },
         { new: true, projection: { msgCount: 1 } },
@@ -172,7 +166,7 @@ updateMsgCount = async (data) => {
 
 //#region ---------------- Remove ---------------------//
 exports.removeAllMsgs = async () => {
-    return await globRoom.update({}, { messages: [] }, (err, result) => {
+    return await groupRoom.update({}, { messages: [] }, (err, result) => {
         if (err) {
             console.log(err);
             return;

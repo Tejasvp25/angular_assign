@@ -1,5 +1,4 @@
 //#region ---------imports--------------
-var localConfig = require('../config/headers').localConfig
 var globalRoomRepo = require('../Repo/GlobalRoomRepo')
 //#endregion ---------imports--------------
 
@@ -11,13 +10,13 @@ var globalRoomRepo = require('../Repo/GlobalRoomRepo')
  *Remove
  */
 
-//#region -------------- Create ----------------------//
+//#region ----------------- Create ----------------------//
 exports.addNewMessage = async (msg, un) => {
     globalRoomRepo.createNewMessage(msg, un);
 }
 //#endregion -------------- Create ----------------------//
 
-//#region -------------- Load ----------------------//
+//#region -------------- -- Load ----------------------//
 exports.getChatHist = async (req, res) => {
     await globalRoomRepo.loadChatHist()
         .then(repoResult => {
@@ -42,13 +41,13 @@ exports.getAllMessages = async (req, res) => {
 }
 //#endregion -------------- Load ----------------------//
 
-//#region -------------- Update ----------------------//
+//#region ---------------- Update ----------------------//
 
 //Returns true on successful update and false if the update is unsuccessful
 exports.updateUserCount = async (data) => {
     return globalRoomRepo.updateUserCount(data)
 }
-//#endregion -------------- Update ----------------------//
+//#endregion -------------Update ----------------------//
 
 //#region -------------- Remove ----------------------//
 exports.clearAllMsgs = () => {

@@ -2,6 +2,7 @@
 
 var io = require('../config/headers').io
 var globRoomController = require('./GlobalRoomController')
+var groupRoomController = require('./GroupRoomController')
 
 var userIdCount = 0
 
@@ -22,14 +23,19 @@ exports.new_socket_conn = io.on('connection', (socket) => {
         });
     })
 
-    socket.on('addGrp', (grpName)=>{
-        console.log(socket.rooms)
+    socket.on('addGrp', async (grpName) => {
         socket.leaveAll();
         socket.join(grpName);
+
+        let groupId;
+        await groupRoomController.createNewGroup(grpName).then(
+            res => groupId = res
+        );
+
+        return groupId;
     })
 
-    socket.on('joinGrp', (grpName)=>{
-        console.log(socket.rooms)
+    socket.on('joinGrp', (grpName) => {
         socket.leaveAll();
         socket.join(grpName);
     })

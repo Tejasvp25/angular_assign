@@ -12,7 +12,7 @@ exports.globRoom = new Schema({
         type: Number,
         default: 0
     },
-    messages:[{
+    messages: [{
         userName: String,
         data: String
     }]
@@ -21,10 +21,6 @@ exports.globRoom = new Schema({
 exports.groupRoom = new Schema({
     groupName: {
         type: String
-    },
-    groupId:{
-        type: String,
-        default: uuidv1()
     },
     activeUserIdCount: {
         type: Number,
@@ -38,9 +34,12 @@ exports.groupRoom = new Schema({
         type: Number,
         default: 0
     },
-    messages:[{
-        userName: String,
-        data: String
-    }]
+    messages: {
+        type: [{
+            userName: String,
+            data: String
+        }],
+        default: []
+    }
 })
 
