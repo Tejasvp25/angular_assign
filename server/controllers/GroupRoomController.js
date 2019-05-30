@@ -1,6 +1,13 @@
 //#region ---------imports--------------
+var ObjectId = require('mongodb').ObjectID;
+
 var groupRoomRepo = require('../Repo/GroupRoomRepo')
 //#endregion ---------imports--------------
+
+//#region -----------------Global variables-----------------
+let logName = "GroupRoomController"
+//#endregion -----------------Global variables-----------------
+
 
 /**
  * --Structure--
@@ -15,21 +22,25 @@ exports.createNewGroup = async (grpName) => {
     let resultId;
     await groupRoomRepo.createNewGroup(grpName)
         .then(res => resultId = res._id)
-        .catch(err => console.log("GroupDbController: \n", err));
+        .catch(err => custConsoleLog(err));
     return resultId;
+}
+
+exports.createNewMessage = async (grpId, msg, un) => {
+    o_grpId = new ObjectId(grpId);
+    groupRoomRepo.createNewMessage(o_grpId, msg, un);
 }
 //#endregion -------------- Create ----------------------//
 
 
 //#region -------------- -- Load ----------------------//
-exports.getAllInfo = (req, res) => {
-    groupRoom.findById(req.params.groupId, (err, data) => {
-        if (err) {
-            console.log(err)
-            return ""
-        }
-        res.json(data)
-    })
+exports.getChatHist = async (req, res) => {
+    grpId = req.params.groupId
+    o_grpId = new ObjectId(grpId);
+    await groupRoomRepo.loadChatHist(o_grpId)
+        .then(repoResult => {
+            res.json(repoResult);
+        })
 }
 
 exports.getNumUsers = (req, res) => {
@@ -52,3 +63,9 @@ exports.getNumUsers = (req, res) => {
 //#region -------------------- Remove ----------------------//
 
 //#endregion ----------------- Remove ----------------------//
+
+//#region -----------------------Helper functions----------------------------
+function custConsoleLog(str){
+    console.log(`${logName} :: ${str}`)
+}
+//#endregion --------------------Helper functions----------------------------

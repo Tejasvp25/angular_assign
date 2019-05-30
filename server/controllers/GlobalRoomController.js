@@ -11,7 +11,7 @@ var globalRoomRepo = require('../Repo/GlobalRoomRepo')
  */
 
 //#region ----------------- Create ----------------------//
-exports.addNewMessage = async (msg, un) => {
+exports.createNewMessage = async (msg, un) => {
     globalRoomRepo.createNewMessage(msg, un);
 }
 //#endregion -------------- Create ----------------------//
@@ -24,10 +24,6 @@ exports.getChatHist = async (req, res) => {
         })
 }
 
-exports.getNumUsers = async (req, res) => {
-    await globalRoomRepo.loadNumUsers()
-        .then(repoResult => res.json(repoResult))
-}
 
 exports.getNumMsgs = async (req, res) => {
     await globalRoomRepo.loadNumMsgs()
@@ -35,10 +31,6 @@ exports.getNumMsgs = async (req, res) => {
         .then(repoResult => res.json(repoResult))
 }
 
-exports.getAllMessages = async (req, res) => {
-    await globalRoomRepo.loadAllMessages()
-        .then(repoResult => res.json(repoResult))
-}
 //#endregion -------------- Load ----------------------//
 
 //#region ---------------- Update ----------------------//

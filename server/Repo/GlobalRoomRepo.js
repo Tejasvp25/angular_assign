@@ -92,11 +92,14 @@ exports.loadNumUsers = async () => {
             console.log(err)
             return;
         }
+        if (data.length === 0) {
+            data = [{ "userIdCount": 0 }];
+        }
         return data;
     })
 }
 
-loadNumMsgs = async () => {
+async function loadNumMsgs() {
     return await globRoom.find({}, { msgCount: 1 }, (err, data) => {
         if (err) {
             console.log(err);
@@ -110,16 +113,8 @@ loadNumMsgs = async () => {
 }
 exports.loadNumMsgs = loadNumMsgs;
 
-exports.loadAllMessages = async () => {
-    await globRoom.find({}, { messages: 1 }, (err, data) => {
-        if (err) {
-            console.log(err);
-            return;
-        }
-        return data;
-    })
-}
 //#endregion ---------------- Load ---------------------//
+
 
 //#region ---------------- Update ---------------------//
 
@@ -139,7 +134,7 @@ exports.updateUserCount = async (data) => {
 }
 
 //Updates message count and returns the updated count
-updateMsgCount = async (data) => {
+async function updateMsgCount(data) {
     return await globRoom.findOneAndUpdate(
         {},
         { msgCount: data },

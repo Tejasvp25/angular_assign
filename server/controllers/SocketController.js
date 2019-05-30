@@ -19,19 +19,21 @@ exports.new_socket_conn = io.on('connection', (socket) => {
         console.log("UserName : ", data["username"])
         Object.keys(socket.rooms).forEach(roomId => {
             socket.broadcast.to(roomId).emit('serverMsg', data)
-            globRoomController.addNewMessage(data["message"], data["username"])
+            globRoomController.createNewMessage(data["message"], data["username"])
         });
     })
 
     socket.on('addGrp', async (grpName) => {
         socket.leaveAll();
-        socket.join(grpName);
 
         let groupId;
         await groupRoomController.createNewGroup(grpName).then(
             res => groupId = res
         );
 
+        //Socket joins the groupId
+        socket.join(groupId);
+        emitOnGroupCreate(groupId);
         return groupId;
     })
 
@@ -43,6 +45,13 @@ exports.new_socket_conn = io.on('connection', (socket) => {
     socket.on('disconnect', () => {
         updateUserCount(--userIdCount)
     });
+
+
+    //#region ------------------Socket Emitting functions-----------------------
+    function emitOnGroupCreate(grpId){
+        socket.emit('grpCreated', grpId);
+    }
+    //#endregion ---------------Socket Emitting functions-----------------------
 })
 
 

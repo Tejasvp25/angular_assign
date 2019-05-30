@@ -12,7 +12,7 @@ const fetchService = require('../services/fetchService')
 
 
 //#region -----------------Global variables-----------------
-let numMessages;
+
 //#endregion -----------------Global variables-----------------
 
 /**
@@ -36,33 +36,14 @@ exports.createNewGroup = async (groupName) => {
     return new_grp.save()
 }
 
-exports.createNewMessage = async (msg, userName) => {
+exports.createNewMessage = async (grpId, msg, userName) => {
     res = new ResAPI();
 
     // Increase the msg count by 1
-    await incrementNumMsgs()
-
-    console.log("NumMessages: " + numMessages)
-
-    // If the number of message(s) is 1, then create the global room
-    if (numMessages === 1) {
-        main = new groupRoom({ "userIdCount": 1, "msgCount": 1, "messages": [{ "userName": userName, "data": msg }] })
-        main.save((err, res) => {
-            if (err) {
-                console.log(err)
-                res.retCode = APIReturnEnum.ErrorOccured;
-                res.object = false;
-                // return res
-            }
-            console.log("Message added successfully!! -- New")
-            res.retCode = APIReturnEnum.Successful;
-            res.object = true;
-            // return res;
-        })
-    }
+    incrementNumMsgs(grpId)
 
     // Push new messages
-    groupRoom.findOneAndUpdate({}, {
+    groupRoom.findOneAndUpdate({ _id: grpId }, {
         $addToSet:
         {
             "messages": {
@@ -86,8 +67,8 @@ exports.createNewMessage = async (msg, userName) => {
 //#endregion ---------------- Create ---------------------//
 
 //#region ---------------- Load ---------------------//
-exports.loadChatHist = async () => {
-    return await groupRoom.find({}, (err, data) => {
+exports.loadChatHist = async (grpId) => {
+    return await groupRoom.find({_id: grpId}, (err, data) => {
         if (err) {
             console.log(err);
             return;
@@ -96,18 +77,8 @@ exports.loadChatHist = async () => {
     })
 }
 
-exports.loadNumUsers = async () => {
-    return await groupRoom.find({}, { userIdCount: 1 }, (err, data) => {
-        if (err) {
-            console.log(err)
-            return;
-        }
-        return data;
-    })
-}
-
-loadNumMsgs = async () => {
-    return await groupRoom.find({}, { msgCount: 1 }, (err, data) => {
+async function loadNumMsgs(grpId) {
+    return await groupRoom.find({ _id: grpId }, { msgCount: 1 }, (err, data) => {
         if (err) {
             console.log(err);
             return;
@@ -149,10 +120,10 @@ exports.updateUserCount = async (data) => {
 }
 
 //Updates message count and returns the updated count
-updateMsgCount = async (data) => {
+async function updateMsgCount(grpId, newCount) {
     return await groupRoom.findOneAndUpdate(
-        {},
-        { msgCount: data },
+        { _id: grpId },
+        { msgCount: newCount },
         { new: true, projection: { msgCount: 1 } },
         (err, count) => {
             if (err) {
@@ -176,22 +147,22 @@ exports.removeAllMsgs = async () => {
 }
 //#endregion ---------------- Remove ---------------------//
 
+
 //#region ---------------- Helper Functions----------------//
 
 //Increment the number of messages by 1
-async function incrementNumMsgs() {
-    if (isNaN(numMessages)) {
-        await loadNumMsgs()
-            .then(res => res[0])
-            .then(res => numMessages = res.msgCount)
-            .catch(err => {
-                numMessages = 0;
-            });
-    }
+async function incrementNumMsgs(grpId) {
+    let numMessages;
 
-    updateMsgCount(++numMessages)
-        .then(newCount => newCount.msgCount)
-        .then(newCount => numMessages = newCount)
+    //Load the current number of messages in the group and increase it by 1
+    await loadNumMsgs(grpId)
+        .then(res => res[0])
+        .then(res => numMessages = res.msgCount)
+        .catch(err => {
+            numMessages = 0;
+        });
+
+    updateMsgCount(grpId, ++numMessages)
         .catch(err => { });
 }
 
