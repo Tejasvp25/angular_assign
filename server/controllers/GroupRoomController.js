@@ -80,7 +80,13 @@ exports.isGroupExists = async (grpId) => {
         custConsoleLog(err);
         return Promise.resolve(false);
     }
-    return groupRoomRepo.isGroupExists(o_grpId);
+
+    let isValidGrp;
+    await groupRoomRepo.isGroupExists(o_grpId)
+        .then(res => isValidGrp = res.length!==0);
+
+    custConsoleLog(isValidGrp)
+    return isValidGrp;
 }
 
 //#endregion -------------- -- Load ----------------------//
@@ -97,7 +103,7 @@ exports.updateUserCount = async (grpId, count) => {
         return;
     }
     groupRoomRepo.updateUserCount(o_grpId, count)
-    
+
 }
 //#endregion ----------------- Update ----------------------//
 

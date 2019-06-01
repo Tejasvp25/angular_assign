@@ -107,12 +107,12 @@ exports.loadNumMsgs = loadNumMsgs;
 
 //Returns true if the groupId is valid else false
 exports.isGroupExists = async (grpId) => {
-    return await groupRoom.find({ _id: grpId }, (err, data) => {
+    return await groupRoom.find({ _id: grpId }, {_id: 1}, (err, data) => {
         if (err) {
             custConsoleLog(err)
             return;
         }
-        return data.length !== 0
+        return data;
     })
 }
 

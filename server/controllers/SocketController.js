@@ -1,17 +1,14 @@
 ///@author : Sraavan Sridhar
 
 var io = require('../config/headers').io
-var globRoomController = require('./GlobalRoomController')
+// var globRoomController = require('./GlobalRoomController')
 var groupRoomController = require('./GroupRoomController')
 
-var userIdCount = 0
 let logName = "SocketController"
 
 exports.new_socket_conn = io.on('connection', (socket) => {
     console.log("A user connected")
-    console.log(socket.rooms)
-
-
+    // console.log(socket.rooms)
 
     //data = {"grpId":grpId, "message" : msg, "username": username}
     socket.on('clientMsg', (data) => {
@@ -20,59 +17,87 @@ exports.new_socket_conn = io.on('connection', (socket) => {
         console.log("Message : ", data["message"])
         console.log("UserName : ", data["username"])
         Object.keys(socket.rooms).forEach(roomId => {
+            custConsoleLog(roomId);
             emitNewMessage(roomId, data);
             groupRoomController.createNewMessage(data.grpId, data.message, data.username)
+            return;
         });
     })
 
 
     socket.on('addGrp', async (grpName) => {
+        //Decrease number of users in the room the socket is currently in
+        let curGrpId = socket.roomId;
+        let count;
+        if (typeof curGrpId !== 'undefined') {
+            custConsoleLog("Reducing CurGrpId");
+            count = await decreaseUserCount(curGrpId);
+            emitUserCountUpdate(curGrpId, count);
+        }
         socket.leaveAll();
 
-        let groupId;
+        let newGroupId;
         await groupRoomController.createNewGroup(grpName).then(
-            res => groupId = res
+            res => newGroupId = res
         );
 
         //Socket joins the groupId
-        socket.join(groupId);
-        emitAddGroupResult(groupId);
-        return groupId;
+        socket.join(newGroupId);
+        socket.roomId = newGroupId;
+
+        emitAddGroupResult(newGroupId);
+        emitUserCountUpdate(newGroupId, 1); //Default number of active users in the room when the room is created
+        return newGroupId;
     })
 
-    socket.on('joinGrp', async (grpId) => {
-        //TODO: Remove users from current group here
-        socket.leaveAll();
+    socket.on('joinGrp', async (newGrpId) => {
 
-        //Validate group id here
+        //Check if the group is valid
         let isValidGroup;
-        await groupRoomController.isGroupExists(grpId)
+        await groupRoomController.isGroupExists(newGrpId)
             .then(res => isValidGroup = res);
 
-        if (!isValidGroup) {
-            emitJoinGroupResult(false, grpId);
+        if (!isValidGroup || isValidGroup === null || isValidGroup === undefined) {
+            custConsoleLog("Not a valid group");
+            emitJoinGroupResult(false, '');
             return;
         }
 
-        socket.join(grpId);
+        //Decrease number of users in the room the socket is currently in
+        let curGrpId = socket.roomId;
+        let count;
+        if (typeof curGrpId !== 'undefined') {
+            custConsoleLog("Reducing CurGrpId");
+            count = await decreaseUserCount(curGrpId);
+            emitUserCountUpdate(curGrpId, count);
+        }
 
-        const count = increaseUserCount(grpId);
-        emitUserCountUpdate(grpId, count);
+        //Leave all the joined rooms which is always 1
+        socket.leaveAll();
 
-        emitJoinGroupResult(true, grpId);
+        socket.join(newGrpId);
+
+        socket.roomId = newGrpId;
+
+        //Increase the number of users in the room the socket is joining
+        count = await increaseUserCount(newGrpId);
+        emitUserCountUpdate(newGrpId, count);
+
+        emitJoinGroupResult(true, newGrpId);
     })
 
-    socket.on('disconnect', () => {
-        let isValidGroup;
-        Object.keys(socket.rooms).forEach(roomId => {
-            groupRoomController.isGroupExists(roomId)
-                .then(res => isValidGroup = res);
+    socket.on('disconnect', async () => {
+        let curGrpId = socket.roomId;
 
-            if (isValidGroup) {
-                const count = decreaseUserCount(grpId);
-                emitUserCountUpdate(grpId, count);
-            }
-        })
+        custConsoleLog("A User disconnected from " + curGrpId)
+
+        if (curGrpId === undefined || curGrpId === null) {
+            return;
+        }
+
+        const count = await decreaseUserCount(curGrpId);
+        emitUserCountUpdate(curGrpId, count);
+
     });
 
 
@@ -90,7 +115,8 @@ exports.new_socket_conn = io.on('connection', (socket) => {
     }
 
     function emitUserCountUpdate(grpId, count) {
-        socket.broadcast.to(grpId).emit('getUsers', count);
+        custConsoleLog("Emiting num users: " + count + " to grp: " + grpId);
+        io.sockets.to(grpId).emit('getUsers', count);
     }
 
     //data = {"grpId":grpId, "message" : msg, "username": username}

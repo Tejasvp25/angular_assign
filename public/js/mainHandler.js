@@ -4,7 +4,7 @@ var socket = io()
 
 //  Do Initial config here
 getChatHistory();
-var currentGrpId;
+let currentGrpId;
 
 //#region --------------------------------------- Socket Incoming events ------------------------------------------------------ //
 
