@@ -22,11 +22,7 @@ exports.groupRoom = new Schema({
     groupName: {
         type: String
     },
-    activeUserIdCount: {
-        type: Number,
-        default: 0
-    },
-    totalUsersInGroup: {
+    userIdCount: {
         type: Number,
         default: 1
     },

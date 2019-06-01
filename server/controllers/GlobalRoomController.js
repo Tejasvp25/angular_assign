@@ -35,7 +35,6 @@ exports.getNumMsgs = async (req, res) => {
 
 //#region ---------------- Update ----------------------//
 
-//Returns true on successful update and false if the update is unsuccessful
 exports.updateUserCount = async (data) => {
     return globalRoomRepo.updateUserCount(data)
 }

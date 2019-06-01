@@ -8,6 +8,5 @@ module.exports = (app) => {
 
     app.get('/getNumMsgs', globRoom.getNumMsgs)
 
-    // app.post(':groupId',groupRoom.addNewGroup)
 }
 

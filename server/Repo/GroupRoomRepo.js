@@ -12,7 +12,7 @@ const fetchService = require('../services/fetchService')
 
 
 //#region -----------------Global variables-----------------
-
+let logName = "GroupRoomRepo"
 //#endregion -----------------Global variables-----------------
 
 /**
@@ -53,12 +53,12 @@ exports.createNewMessage = async (grpId, msg, userName) => {
         }
     }, (err, result) => {
         if (err) {
-            console.log("Error inserting message")
+            custConsoleLog("Error inserting message")
             res.retCode = APIReturnEnum.ErrorOccured;
             res.object = false;
             // return res
         }
-        console.log("Message inserted succesfully!!")
+        custConsoleLog("Message inserted succesfully!!")
         res.retCode = APIReturnEnum.Successful;
         res.object = true;
         // return res;
@@ -68,11 +68,25 @@ exports.createNewMessage = async (grpId, msg, userName) => {
 
 //#region ---------------- Load ---------------------//
 exports.loadChatHist = async (grpId) => {
-    return await groupRoom.find({_id: grpId}, (err, data) => {
+    return await groupRoom.find({ _id: grpId }, (err, data) => {
         if (err) {
-            console.log(err);
+            custConsoleLog(err);
             return;
         }
+        return data;
+    })
+}
+
+exports.loadNumUsers = async (grpId) => {
+    return groupRoom.find({ _id: grpId }, { userIdCount: 1, _id: 0 }, (err, data) => {
+        if (err) {
+            custConsoleLog(err)
+            return;
+        }        
+        if (data.length === 0) {
+            data = [{ "userIdCount": 0 }];
+        }
+        custConsoleLog("loadNumUsers : "+data)
         return data;
     })
 }
@@ -80,7 +94,7 @@ exports.loadChatHist = async (grpId) => {
 async function loadNumMsgs(grpId) {
     return await groupRoom.find({ _id: grpId }, { msgCount: 1 }, (err, data) => {
         if (err) {
-            console.log(err);
+            custConsoleLog(err);
             return;
         }
         if (data.length === 0) {
@@ -91,23 +105,25 @@ async function loadNumMsgs(grpId) {
 }
 exports.loadNumMsgs = loadNumMsgs;
 
-exports.loadAllMessages = async () => {
-    await groupRoom.find({}, { messages: 1 }, (err, data) => {
+//Returns true if the groupId is valid else false
+exports.isGroupExists = async (grpId) => {
+    return await groupRoom.find({ _id: grpId }, (err, data) => {
         if (err) {
-            console.log(err);
+            custConsoleLog(err)
             return;
         }
-        return data;
+        return data.length !== 0
     })
 }
+
 //#endregion ---------------- Load ---------------------//
 
 //#region ---------------- Update ---------------------//
 
 //Updates user count and returns the updated count
-exports.updateUserCount = async (data) => {
+exports.updateUserCount = async (grpId, data) => {
     return await groupRoom.findOneAndUpdate(
-        {},
+        { _id: grpId },
         { userIdCount: data },
         { new: true, projection: { userIdCount: 1 } },
         (err, count) => {
@@ -115,6 +131,7 @@ exports.updateUserCount = async (data) => {
                 console.log(err);
                 return;
             }
+            custConsoleLog("updateUserCount : "+count);
             return count;
         })
 }
@@ -127,7 +144,7 @@ async function updateMsgCount(grpId, newCount) {
         { new: true, projection: { msgCount: 1 } },
         (err, count) => {
             if (err) {
-                console.log(err);
+                custConsoleLog(err);
                 return;
             }
             return count;
@@ -136,10 +153,10 @@ async function updateMsgCount(grpId, newCount) {
 //#endregion ---------------- Update ---------------------//
 
 //#region ---------------- Remove ---------------------//
-exports.removeAllMsgs = async () => {
-    return await groupRoom.update({}, { messages: [] }, (err, result) => {
+exports.removeAllMsgs = async (grpId) => {
+    return await groupRoom.update({ _id: grpId }, { messages: [] }, (err, result) => {
         if (err) {
-            console.log(err);
+            custConsoleLog(err);
             return;
         }
         return result;
@@ -164,6 +181,10 @@ async function incrementNumMsgs(grpId) {
 
     updateMsgCount(grpId, ++numMessages)
         .catch(err => { });
+}
+
+function custConsoleLog(str) {
+    console.log(`${logName} :: ${str}`)
 }
 
 //#endregion --------------------Helper Functions----------------//

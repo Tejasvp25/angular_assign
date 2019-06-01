@@ -4,7 +4,7 @@ var socket = io()
 
 //  Do Initial config here
 getChatHistory();
-
+var currentGrpId;
 
 //#region --------------------------------------- Socket Incoming events ------------------------------------------------------ //
 
@@ -16,7 +16,18 @@ socket.on('getUsers', d => {
 socket.on('serverMsg', message => receiveMessage(message["message"], message["username"]))
 
 socket.on('grpCreated', grpId => {
+    currentGrpId = grpId;
     showAddGroupResult(grpId);
+})
+
+socket.on('joinGrpResult', res => {
+    if (res.success) {
+        clearDisplayMessages();
+        getChatHistory(res.grpId);
+        currentGrpId = res.grpId;
+    } else {
+        alert("Please enter a valid group Id");
+    }
 })
 
 //#endregion --------------------------------------- Socket Incoming events ------------------------------------------------------ //
@@ -25,20 +36,28 @@ socket.on('grpCreated', grpId => {
 //#region ------------------------------------------ Socket outgoing events ------------------------------------------------------ //
 
 function emitAddMsg(message, userName) {
+    console.log(currentGrpId);
+    if (currentGrpId === null || currentGrpId === undefined || currentGrpId === '') {
+        alert('Please join a channel to start chatting:)');
+        return false;
+    }
     let data = {
+        "grpId": currentGrpId,
         "message": message,
         "username": userName
     }
     socket.emit("clientMsg", data)
-}
-
-function emitChangeGroup(grpName) {
-    socket.emit('changeGrp', grpName)
+    return true;
 }
 
 function emitAddGroup(grpName) {
-    socket.emit("addGrp", grpName)
+    socket.emit("addGrp", grpName);
 }
+
+function emitJoinGroup(grpId) {
+    socket.emit('joinGrp', grpId);
+}
+
 
 //#endregion --------------------------------------- Socket outgoing events ------------------------------------------------------ //
 
@@ -67,9 +86,10 @@ function addGroupInList(groupName) {
 
 function joinGroup() {
     let grpId = prompt("Enter a group Id: ");
-    socket.emit('joinGrp', grpId);
-    clearDisplayMessages()
-    getChatHistory(grpId);
+    if (grpId === null || grpId === '') {
+        return;
+    }
+    emitJoinGroup(grpId);
 }
 
 //#endregion ---------------------------------------------- Group-------------------------------------------------//
@@ -82,7 +102,9 @@ function sendMessage() {
         return false;
     }
 
-    emitAddMsg(message, userName)
+    if (!emitAddMsg(message, userName)) {
+        return;
+    }
 
     $('<li class="sent"><img src="http://emilcarlsson.se/assets/mikeross.png" alt="" /><p>' + message + '</p></li>').appendTo($('.messages ul'));
     $('.message-input input').val(null);
