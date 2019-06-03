@@ -1,0 +1,25 @@
+.container {
+    margin-left: 50px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+}
+
+#chatImg{
+    height: 600px;
+}
+
+.btnContainer{
+    height: 400px;
+    margin-left: 20px;
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.btnLand{
+    text-align: center;
+    font-size: 35px;
+    margin-top: 50px;
+}

@@ -1,0 +1,52 @@
+<div class="container">
+  <img src='../../../assets/Images/chatBackground.gif' id="chatImg">
+  <div class="btnContainer">
+    <button type="button" class="btn btn-success btnLand" id="createBtn" (click)="createRoom(createRoomModal)">
+      <i class="fa fa-plus-circle" aria-hidden="true"></i>
+      Create a room
+    </button>
+    <button type="button" class="btn btn-success btnLand" id="joinBtn" (click)="joinRoom(joinRoomModal)">
+      <i class="fa fa-sign-in" aria-hidden="true"></i>
+      Join a room
+    </button>
+  </div>
+</div>
+
+<!-- Modal -->
+<ng-template #createRoomModal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">Create New Room</h4>
+    <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="form-group">
+      <label for="roomName">Please enter a name for the room</label>
+      <input id="createRoomInp" class="form-control" placeholder="Room name" name="createRoomInp"
+        [(ngModel)]="newRoomName" autofocus>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-primary" (click)="modal.close('Save click')">Create Room</button>
+  </div>
+</ng-template>
+
+<ng-template #joinRoomModal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">Join a Room</h4>
+    <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="form-group">
+      <label for="roomName">Please enter the Room Id of the room you want to join</label>
+      <input id="joinRoomInp" class="form-control" placeholder="Room Id" name="joinRoomInp" [(ngModel)]="joinRoomId"
+        autofocus>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-primary" (click)="modal.close('Save click')">Join Room</button>
+  </div>
+</ng-template>

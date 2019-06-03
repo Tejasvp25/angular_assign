@@ -19,7 +19,7 @@ socket.on('grpCreated', grpId => {
     currentGrpId = grpId;
     showAddGroupResult(grpId);
 })
-
+    
 socket.on('joinGrpResult', res => {
     if (res.success) {
         clearDisplayMessages();
