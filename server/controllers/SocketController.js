@@ -1,4 +1,4 @@
-///@author : Sraavan Sridhar
+//@author : Sraavan Sridhar
 
 var io = require('../config/headers').io
 // var globRoomController = require('./GlobalRoomController')
@@ -16,16 +16,22 @@ exports.new_socket_conn = io.on('connection', (socket) => {
         console.log("Group Id : ", data["grpId"]);
         console.log("Message : ", data["message"])
         console.log("UserName : ", data["username"])
-        Object.keys(socket.rooms).forEach(roomId => {
-            custConsoleLog(roomId);
-            emitNewMessage(roomId, data);
-            groupRoomController.createNewMessage(data.grpId, data.message, data.username)
-            return;
-        });
+        
+        let curGrpId = socket.roomId;
+        emitNewMessage(curGrpId, data);
+        groupRoomController.createNewMessage(data.grpId, data.message, data.username);
+
+        // Object.keys(socket.rooms).forEach(roomId => {
+        //     custConsoleLog(roomId);
+        //     emitNewMessage(roomId, data);
+        //     groupRoomController.createNewMessage(data.grpId, data.message, data.username)
+        //     return;
+        // });
     })
 
 
     socket.on('addGrp', async (grpName) => {
+
         //Decrease number of users in the room the socket is currently in
         let curGrpId = socket.roomId;
         let count;
