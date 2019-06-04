@@ -82,11 +82,11 @@ exports.loadNumUsers = async (grpId) => {
         if (err) {
             custConsoleLog(err)
             return;
-        }        
+        }
         if (data.length === 0) {
             data = [{ "userIdCount": 0 }];
         }
-        custConsoleLog("loadNumUsers : "+data)
+        custConsoleLog("loadNumUsers : " + data)
         return data;
     })
 }
@@ -107,10 +107,13 @@ exports.loadNumMsgs = loadNumMsgs;
 
 //Returns true if the groupId is valid else false
 exports.isGroupExists = async (grpId) => {
-    return await groupRoom.find({ _id: grpId }, {_id: 1}, (err, data) => {
+    let resApi = new ResAPI();
+    return await groupRoom.find({ _id: grpId }, { _id: 1 }, (err, data) => {
         if (err) {
             custConsoleLog(err)
-            return;
+            // resApi.retCode = APIReturnEnum.ErrorOccured;
+            // resApi.retMessage = "Error finding the room"
+            // return [resApi];
         }
         return data;
     })
@@ -129,9 +132,9 @@ exports.updateUserCount = async (grpId, data) => {
         (err, count) => {
             if (err) {
                 console.log(err);
-                return;
+                return [{ 'userIdCount': 0 }];
             }
-            custConsoleLog("updateUserCount : "+count);
+            custConsoleLog("updateUserCount : " + count);
             return count;
         })
 }
@@ -145,7 +148,7 @@ async function updateMsgCount(grpId, newCount) {
         (err, count) => {
             if (err) {
                 custConsoleLog(err);
-                return;
+                return [{ 'msgCount': 0 }];
             }
             return count;
         })

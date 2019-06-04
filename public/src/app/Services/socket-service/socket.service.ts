@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import * as io from 'socket.io-client';
 import { Observable, observable } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
+import { ResAPI } from 'src/app/Models/Returns/ResAPI';
 
 @Injectable({
   providedIn: 'root'
@@ -56,13 +57,13 @@ export class SocketService {
     });
   }
 
-  public onRoomCreated(): Observable<any> {
+  public onRoomCreated(): Observable<ResAPI> {
     return new Observable<any>(observer => {
-      this.socket.on('grpCreated', (grpId) => observer.next(grpId));
+      this.socket.on('grpCreated', (res) => observer.next(res));
     });
   }
 
-  public onRoomJoined(): Observable<any> {
+  public onRoomJoined(): Observable<ResAPI> {
     return new Observable<any>(observer => {
       this.socket.on('joinGrpResult', (res) => observer.next(res));
     });

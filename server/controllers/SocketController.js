@@ -3,6 +3,8 @@
 var io = require('../config/headers').io
 // var globRoomController = require('./GlobalRoomController')
 var groupRoomController = require('./GroupRoomController')
+const ResAPI = require('../Parameters/ResAPI');
+const APIReturnEnum = require('../models/Enums/APIReturnEnum');
 
 let logName = "SocketController"
 
@@ -16,7 +18,7 @@ exports.new_socket_conn = io.on('connection', (socket) => {
         console.log("Group Id : ", data["grpId"]);
         console.log("Message : ", data["message"])
         console.log("UserName : ", data["username"])
-        
+
         let curGrpId = socket.roomId;
         emitNewMessage(curGrpId, data);
         groupRoomController.createNewMessage(data.grpId, data.message, data.username);
@@ -32,64 +34,77 @@ exports.new_socket_conn = io.on('connection', (socket) => {
 
     socket.on('addGrp', async (grpName) => {
 
-        //Decrease number of users in the room the socket is currently in
-        let curGrpId = socket.roomId;
-        let count;
-        if (typeof curGrpId !== 'undefined') {
-            custConsoleLog("Reducing CurGrpId");
-            count = await decreaseUserCount(curGrpId);
-            emitUserCountUpdate(curGrpId, count);
-        }
-        socket.leaveAll();
-
+        // //Decrease number of users in the room the socket is currently in
+        // let curGrpId = socket.roomId;
+        // let count;
+        // if (typeof curGrpId !== 'undefined') {
+        //     custConsoleLog("Reducing CurGrpId");
+        //     count = await decreaseUserCount(curGrpId);
+        //     emitUserCountUpdate(curGrpId, count);
+        // }
+        let resApi = new ResAPI();
         let newGroupId;
         await groupRoomController.createNewGroup(grpName).then(
-            res => newGroupId = res
+            res => {
+                resApi = res;
+                if (res.retCode === APIReturnEnum.Successful) {
+                    newGroupId = res.object;
+                }
+            }
         );
+        emitAddGroupResult(resApi);
+        if (res.retCode === APIReturnEnum.ErrorOccured){
+            return;
+        }
 
+        socket.leaveAll();
         //Socket joins the groupId
         socket.join(newGroupId);
         socket.roomId = newGroupId;
 
-        emitAddGroupResult(newGroupId);
-        emitUserCountUpdate(newGroupId, 1); //Default number of active users in the room when the room is created
-        return newGroupId;
+        custConsoleLog("Created new group :: " + grpName);
+        // emitAddGroupResult(newGroupId);
+        // emitUserCountUpdate(newGroupId, 1); //Default number of active users in the room when the room is created
+        // return newGroupId;
     })
 
     socket.on('joinGrp', async (newGrpId) => {
 
         //Check if the group is valid
+        let resApi = new ResAPI();
         let isValidGroup;
         await groupRoomController.isGroupExists(newGrpId)
-            .then(res => isValidGroup = res);
+            .then(res => {
+                isValidGroup = res.object;
+                resApi = res;
+            });
 
         if (!isValidGroup || isValidGroup === null || isValidGroup === undefined) {
             custConsoleLog("Not a valid group");
-            emitJoinGroupResult(false, '');
+            emitJoinGroupResult(resApi);
             return;
         }
 
-        //Decrease number of users in the room the socket is currently in
-        let curGrpId = socket.roomId;
-        let count;
-        if (typeof curGrpId !== 'undefined') {
-            custConsoleLog("Reducing CurGrpId");
-            count = await decreaseUserCount(curGrpId);
-            emitUserCountUpdate(curGrpId, count);
-        }
+        // //Decrease number of users in the room the socket is currently in
+        // let curGrpId = socket.roomId;
+        // let count;
+        // if (typeof curGrpId !== 'undefined') {
+        //     custConsoleLog("Reducing CurGrpId");
+        //     count = await decreaseUserCount(curGrpId);
+        //     emitUserCountUpdate(curGrpId, count);
+        // }
 
         //Leave all the joined rooms which is always 1
         socket.leaveAll();
-
         socket.join(newGrpId);
-
         socket.roomId = newGrpId;
 
+        resApi.object = newGrpId;
         //Increase the number of users in the room the socket is joining
         count = await increaseUserCount(newGrpId);
         emitUserCountUpdate(newGrpId, count);
 
-        emitJoinGroupResult(true, newGrpId);
+        emitJoinGroupResult(resApi);
     })
 
     socket.on('disconnect', async () => {
@@ -108,16 +123,12 @@ exports.new_socket_conn = io.on('connection', (socket) => {
 
 
     //#region ------------------Socket Emitting functions-----------------------
-    function emitAddGroupResult(grpId) {
-        socket.emit('grpCreated', grpId);
+    function emitAddGroupResult(resApi) {
+        socket.emit('grpCreated', resApi);
     }
 
-    function emitJoinGroupResult(success, grpId = '') {
-        let data = {
-            "success": success,
-            "grpId": grpId
-        }
-        socket.emit('joinGrpResult', data);
+    function emitJoinGroupResult(resApi) {
+        socket.emit('joinGrpResult', resApi);
     }
 
     function emitUserCountUpdate(grpId, count) {
@@ -147,7 +158,10 @@ async function decreaseUserCount(grpId) {
 
 //returns the number of updated users in a group
 async function updateUserCount(grpId, adjValue) {
-    let curUsers = await groupRoomController.getNumUsersInGroup(grpId);
+    let curUsers = await groupRoomController.getNumUsersInGroup(grpId).catch(err => {
+        custConsoleLog("Error fetching the number of users");
+        return 0;
+    });
     custConsoleLog("Num Users: " + curUsers);
 
     curUsers += adjValue;
