@@ -1,16 +1,18 @@
 {
   "name": "chatroom",
   "version": "1.0.0",
-  "description": "A generated IBM Cloud application",
+  "description": "A chat application",
   "private": true,
   "engines": {
-    "node": "^8.11.1"
+    "node": "^8.11.1",
+    "npm": "6.9.0"
   },
   "scripts": {
     "start": "node server/server.js",
     "debug": "chmod +x run-debug && ./run-debug",
     "test": "nyc mocha",
-    "dev": "nodemon server/server.js"
+    "dev": "nodemon server/server.js",
+    "heroku-postbuild": "cd public && npm install"
   },
   "nodemonConfig": {
     "env": {
