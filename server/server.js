@@ -9,9 +9,15 @@ const localConfig = require('./config/headers').localConfig;
 
 var mongoose = require('mongoose')
 mongoose.Promise = global.Promise
-mongoose.connect('mongodb://localhost/chatRoomDb', {
+// mongoose.connect('mongodb://localhost/chatRoomDb', {
+//     useNewUrlParser: true
+// })
+const dbUserName = localConfig.dbUserName
+const dbPassword = localConfig.dbPassword
+
+mongoose.connect(`mongodb://${dbUserName}:${dbPassword}@ds133187.mlab.com:33187/heroku_c5v2h135`, {
     useNewUrlParser: true
-})
+});
 
 require('./routers/index')(app, server);
 require('./routers/routes')(app);
