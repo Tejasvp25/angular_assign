@@ -12,7 +12,7 @@
     "debug": "chmod +x run-debug && ./run-debug",
     "test": "nyc mocha",
     "dev": "nodemon server/server.js",
-    "heroku-postbuild": "cd public && npm install"
+    "heroku-postbuild": "cd public && npm install && npm run build"
   },
   "nodemonConfig": {
     "env": {
