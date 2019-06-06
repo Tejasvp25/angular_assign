@@ -6,7 +6,6 @@ import { ToastrService } from 'ngx-toastr';
 import { Router } from '@angular/router';
 import { JoinGroupResult } from 'src/app/Models/ChatModels/chatModels';
 import { NgxSpinnerService } from 'ngx-spinner';
-import { timeout } from 'q';
 import { isNullOrUndefined } from 'util';
 
 @Component({
