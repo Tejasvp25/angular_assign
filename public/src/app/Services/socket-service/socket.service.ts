@@ -1,35 +1,53 @@
+import { isNullOrUndefined } from 'util';
+import { AppService } from './../app-service/app.service';
 import { Injectable } from '@angular/core';
 
 import * as io from 'socket.io-client';
 import { Observable, observable } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 import { ResAPI } from 'src/app/Models/Returns/ResAPI';
+import { NewMessage } from 'src/app/Models/ChatModels/chatModels';
 
 @Injectable({
   providedIn: 'root'
 })
 export class SocketService {
   private socket;
+  public curGroupId = '';
+  // public userName: string;
+  public userName = 'Anonymous';
+  public isNewRoom = false;
 
-  constructor(private toastrService: ToastrService) { }
+  constructor(private appService: AppService,
+    private toastrService: ToastrService) { }
 
   public initSocket(): void {
-    this.socket = io();
+    this.socket = io(this.appService.socketUrl);
   }
 
-
   // ---------------------------------------- Emmitting events------------------------------------
-  public sendMessage(message: string, username: string, currentGrpId: string): void {
-    console.log(currentGrpId);
-    if (currentGrpId === null || currentGrpId === undefined || currentGrpId === '') {
+  public sendMessage(message: string): void {
+    if (isNullOrUndefined(this.curGroupId) || this.curGroupId === '') {
       this.toastrService.warning('Please join a channel to start chatting:)');
       return;
     }
-    const data = {
-      'grpId': currentGrpId,
-      'message': message,
-      'username': username
+
+    if (isNullOrUndefined(this.userName) || this.userName === '') {
+      this.toastrService.warning('Please enter a valid username to start chatting:)');
+      return;
+    }
+
+    // const data = {
+    //   'grpId': this.curGroupId,
+    //   'message': message,
+    //   'username': this.userName
+    // };
+    const data: NewMessage = {
+      grpId: this.curGroupId,
+      message: message,
+      username: this.userName
     };
+
     this.socket.emit('clientMsg', data);
   }
 
@@ -39,6 +57,10 @@ export class SocketService {
 
   public joinRoom(grpId: string) {
     this.socket.emit('joinGrp', grpId);
+  }
+
+  public disconnectFromRoom() {
+    this.socket.emit('disconnectFromRoom', {});
   }
 
   // ---------------------------------------- Emmitting events------------------------------------
@@ -71,5 +93,10 @@ export class SocketService {
 
   // ---------------------------------------- Socket On events------------------------------------
 
+  public clearCurrentDetails(): void {
+    this.curGroupId = '';
+    this.userName = '';
+    this.isNewRoom = false;
+  }
 
 }

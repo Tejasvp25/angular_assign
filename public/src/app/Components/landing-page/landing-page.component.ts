@@ -3,6 +3,11 @@ import { SocketService } from './../../Services/socket-service/socket.service';
 import { Component, OnInit } from '@angular/core';
 import { NgbModal, ModalDismissReasons } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
+import { Router } from '@angular/router';
+import { JoinGroupResult } from 'src/app/Models/ChatModels/chatModels';
+import { NgxSpinnerService } from 'ngx-spinner';
+import { timeout } from 'q';
+import { isNullOrUndefined } from 'util';
 
 @Component({
   selector: 'app-landing-page',
@@ -16,7 +21,9 @@ export class LandingPageComponent implements OnInit {
 
   constructor(private modalService: NgbModal,
     private toastrService: ToastrService,
-    private socketService: SocketService) { }
+    private spinner: NgxSpinnerService,
+    private socketService: SocketService,
+    private router: Router) { }
 
   ngOnInit() {
     this.initSocketConnection();
@@ -24,9 +31,15 @@ export class LandingPageComponent implements OnInit {
 
   createRoom(content) {
     this.modalService.open(content, { ariaLabelledBy: 'modal-basic-title' }).result.then((result) => {
+      this.spinner.show();
+      setTimeout(() => {
+        this.spinner.hide();
+      }, 5000);
+
       this.closeResult = `Closed with: ${result}`;
       console.log(`RoomName: ${this.newRoomName}`);
-      if (this.newRoomName === '') {
+
+      if (isNullOrUndefined(this.newRoomName) || this.newRoomName === '') {
         this.toastrService.warning('Please enter a valid roomName');
         return;
       }
@@ -41,8 +54,13 @@ export class LandingPageComponent implements OnInit {
 
   joinRoom(content) {
     this.modalService.open(content, { ariaLabelledBy: 'modal-basic-title' }).result.then((result) => {
+      this.spinner.show();
+      setTimeout(() => {
+        this.spinner.hide();
+      }, 5000);
+
       this.closeResult = `Closed with: ${result}`;
-      console.log(`RoomId: ${this.joinRoomId}`);
+      // console.log(`RoomId: ${this.joinRoomId}`);
 
       this.socketService.joinRoom(this.joinRoomId);
 
@@ -52,23 +70,16 @@ export class LandingPageComponent implements OnInit {
     });
   }
 
-  private getDismissReason(reason: any): string {
-    if (reason === ModalDismissReasons.ESC) {
-      return 'by pressing ESC';
-    } else if (reason === ModalDismissReasons.BACKDROP_CLICK) {
-      return 'by clicking on a backdrop';
-    } else {
-      return `with: ${reason}`;
-    }
-  }
-
   private initSocketConnection(): void {
     this.socketService.initSocket();
 
     this.socketService.onRoomCreated().subscribe(res => {
+      this.spinner.hide();
       if (res.retCode === ApiReturnEnum.Successful) {
         this.toastrService.success('Room created successfully');
-        console.log(res.object);
+        this.socketService.curGroupId = res.object;
+        this.socketService.isNewRoom = true;
+        this.navigateToChatRoom();
       } else {
         this.toastrService.error('Failed to create room. Please try again later');
       }
@@ -78,13 +89,16 @@ export class LandingPageComponent implements OnInit {
     });
 
     this.socketService.onRoomJoined().subscribe(res => {
+      this.spinner.hide();
       if (res.retCode === ApiReturnEnum.Successful) {
-        const isValidGroup: boolean = res.object;
 
-        if (isValidGroup) {
-          // TODO Handle onRoomJoin
+        const joinGrpRes: JoinGroupResult = res.object;
+
+        if (joinGrpRes.isValidGroup) {
+
           this.toastrService.success('Room joined successfully');
-
+          this.socketService.curGroupId = joinGrpRes.groupId;
+          this.navigateToChatRoom();
 
         } else {
           this.toastrService.error('Invalid room Id. <br> Please enter a valid room id', '', { enableHtml: true });
@@ -97,5 +111,18 @@ export class LandingPageComponent implements OnInit {
     });
   }
 
+  private navigateToChatRoom() {
+    this.router.navigateByUrl('/chatRoom');
+  }
+
+  private getDismissReason(reason: any): string {
+    if (reason === ModalDismissReasons.ESC) {
+      return 'by pressing ESC';
+    } else if (reason === ModalDismissReasons.BACKDROP_CLICK) {
+      return 'by clicking on a backdrop';
+    } else {
+      return `with: ${reason}`;
+    }
+  }
 
 }

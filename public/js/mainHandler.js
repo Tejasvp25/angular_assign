@@ -1,6 +1,7 @@
 const userName = prompt("Please enter a NickName : ")
 $('#userId').text(userName)
-var socket = io()
+// var socket = io()
+var socket = io('http://localhost:3000')
 
 //  Do Initial config here
 getChatHistory();

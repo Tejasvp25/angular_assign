@@ -1,4 +1,6 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
+import { routerNgProbeToken } from '@angular/router/src/router_module';
 
 @Component({
   selector: 'app-root',
@@ -7,4 +9,13 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
   title = 'chatroom';
+
+  constructor(private router: Router) {
+    router.events.subscribe((val) => {
+
+    });
+  }
+
+  ngOnInit(): void {
+  }
 }

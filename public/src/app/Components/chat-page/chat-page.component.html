@@ -1,0 +1,160 @@
+<!-- Modal -->
+<ng-template #newRoomModal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">{{groupName}}</h4>
+    <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <p>Group Id : 
+      <span id="inviteGroupIdSpan" (click)="copyMessageToClipBoard(currentGroupId)">
+        {{currentGroupId}}
+      </span>
+    </p>
+    <p>Now you can invite friends with this Id!</p>
+    <p>You can always find this invite id when you enter this room:)</p>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-primary" (click)="modal.close('Save click')">Got it!</button>
+  </div>
+</ng-template>
+
+<!-- Modal -->
+<ng-template #userNameModal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">{{groupName}}</h4>
+    <!-- <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+      <span aria-hidden="true">&times;</span>
+    </button> -->
+  </div>
+  <div class="modal-body">
+    <div class="form-group">
+      <label for="roomName">Please enter a nickname</label>
+      <input id="nicknameInp" class="form-control" placeholder="Nickname" name="nicknameInp" [(ngModel)]="nicknameInp"
+        autofocus>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-primary" (click)="modal.close('Save click')">Let's go!</button>
+  </div>
+</ng-template>
+
+<div id="parentFrame" *ngIf="!socketService.isNewRoom && !showUserNameModal">
+  <div id="frame">
+    <div id="sidepanel">
+      <div id="profile">
+        <div class="wrap">
+          <!-- <img id="profile-img" src="http://emilcarlsson.se/assets/mikeross.png" class="online" alt="" /> -->
+          <img id="profile-img" src="../../../assets/Images/user1.png" class="online" alt="" />
+          <p id="userId">{{username}}</p>
+          <div id="status-options">
+            <ul>
+              <li id="status-online" class="active"><span class="status-circle"></span>
+                <p>Online</p>
+              </li>
+              <!-- <li id="status-away"><span class="status-circle"></span>
+                <p>Away</p>
+              </li>
+              <li id="status-busy"><span class="status-circle"></span>
+                <p>Busy</p>
+              </li>
+              <li id="status-offline"><span class="status-circle"></span>
+                <p>Offline</p>
+              </li> -->
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div id="contacts">
+        <ul id="groupList">
+          <li class="contact active">
+            <div class="wrap">
+              <span class="contact-status online"></span>
+              <!-- <img src="http://emilcarlsson.se/assets/harveyspecter.png" alt="" /> -->
+              <img src="../../../assets/Images/user1.png" alt="" />
+              <div class="meta">
+                <p class="name">You</p>
+                <p class="preview" *ngIf="messageList.length>0">
+                  <span>{{messageList[messageList.length-1].isSent?'You':messageList[messageList.length-1].userName}}</span>
+                  {{messageList[messageList.length-1].message}}
+                </p>
+              </div>
+            </div>
+          </li>
+        </ul>
+        <div class="inviteDiv">
+          <button type="button" class="btn btn-outline-primary" (click)="showFriendsInvite = !showFriendsInvite"
+            [attr.aria-expanded]="!showFriendsInvite" aria-controls="collapseExample">
+            Invite Friends
+          </button>
+        </div>
+        <div class="card" [ngbCollapse]="!showFriendsInvite">
+          <div class="card-body">
+            <h4 class="card-title">{{groupName}}</h4>
+            <!-- <h4 class="card-title">Group room</h4> -->
+            <h6 class="card-subtitle mb-2 text-muted">Invite friends to this room</h6>
+            <p class="card-text">
+              <!-- You can now invite friends with this id: {{currentGroupId}} -->
+              You can now invite friends with this id:
+              <span id="inviteGroupIdSpan" (click)="copyMessageToClipBoard(currentGroupId)">
+                <!-- 5cf2f4f0bf49de1b9c2a7e0e -->
+                {{currentGroupId}}
+              </span>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom left bar -->
+      <div id="bottom-bar">
+        <!-- <button class="addgroup" id="addGroup" onclick="addGroup()"><i class="fa fa-user-plus fa-fw"
+            aria-hidden="true"></i> <span>Add Group</span></button>
+        <button id="joinGroup" onclick="joinGroup()"><i class="fa fa-cog fa-fw" aria-hidden="true"></i> <span>Join
+            Group</span></button> -->
+        <button id="homeBtn" (click)="navigateToLandingPage()"><i class="fa fa-home" aria-hidden="true"></i>
+          <span>Home</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Top Bar -->
+    <div class="content">
+      <div class="contact-profile">
+        <!-- <img src="http://emilcarlsson.se/assets/harveyspecter.png" alt="" /> -->
+        <img src="../../../assets/Images/user1.png" alt="" />
+        <p>{{groupName}} <span id="numUsers" style="padding-left : 130px">{{numActiveUsers}} user(s) connected</span>
+        </p>
+      </div>
+
+      <!-- Message Space -->
+      <div class="messages" #messageDiv [scrollTop]="messageDiv.scrollHeight">
+        <ul id="messagesList">
+          <!-- <li class="sent">
+            <img src="http://emilcarlsson.se/assets/mikeross.png" alt="" />
+            <p>How the hell am I supposed to get a jury to believe you when I am not even sure that I do?!</p>
+          </li> -->
+          <li *ngFor="let msgProp of messageList" [ngClass]="{'sent': msgProp.isSent, 'replies':!msgProp.isSent}">
+            <span *ngIf="msgProp.isSent">
+              <img src=" ../../../assets/Images/user1.png" alt="" />
+              <p>{{msgProp.message}}</p>
+            </span>
+            <span *ngIf="!msgProp.isSent">
+              <p style=" background-color:orange" id="msgUserName">{{msgProp.userName}}</p>
+              <p>{{msgProp.message}}</p>
+            </span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Message Input Bar -->
+      <div class="message-input">
+        <div class="wrap">
+          <input type="text" placeholder="Write your message..." [(ngModel)]="messageInp">
+          <i class="fa fa-paperclip attachment" aria-hidden="true"></i>
+          <button class="submit" (click)="sendMessage()"><i class="fa fa-paper-plane" aria-hidden="true"></i></button>
+        </div>
+      </div>
+    </div>
+  </div>

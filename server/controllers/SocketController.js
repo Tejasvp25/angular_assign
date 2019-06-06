@@ -22,13 +22,6 @@ exports.new_socket_conn = io.on('connection', (socket) => {
         let curGrpId = socket.roomId;
         emitNewMessage(curGrpId, data);
         groupRoomController.createNewMessage(data.grpId, data.message, data.username);
-
-        // Object.keys(socket.rooms).forEach(roomId => {
-        //     custConsoleLog(roomId);
-        //     emitNewMessage(roomId, data);
-        //     groupRoomController.createNewMessage(data.grpId, data.message, data.username)
-        //     return;
-        // });
     })
 
 
@@ -52,20 +45,17 @@ exports.new_socket_conn = io.on('connection', (socket) => {
                 }
             }
         );
-        emitAddGroupResult(resApi);
-        if (res.retCode === APIReturnEnum.ErrorOccured){
+        emitAddGroupResult(resApi, newGroupId);
+        if (res.retCode === APIReturnEnum.ErrorOccured) {
             return;
         }
 
         socket.leaveAll();
-        //Socket joins the groupId
+        //Socket joins the room with id: groupId
         socket.join(newGroupId);
         socket.roomId = newGroupId;
 
         custConsoleLog("Created new group :: " + grpName);
-        // emitAddGroupResult(newGroupId);
-        // emitUserCountUpdate(newGroupId, 1); //Default number of active users in the room when the room is created
-        // return newGroupId;
     })
 
     socket.on('joinGrp', async (newGrpId) => {
@@ -79,9 +69,10 @@ exports.new_socket_conn = io.on('connection', (socket) => {
                 resApi = res;
             });
 
+
         if (!isValidGroup || isValidGroup === null || isValidGroup === undefined) {
             custConsoleLog("Not a valid group");
-            emitJoinGroupResult(resApi);
+            emitJoinGroupResult(resApi, false, newGrpId);
             return;
         }
 
@@ -99,12 +90,15 @@ exports.new_socket_conn = io.on('connection', (socket) => {
         socket.join(newGrpId);
         socket.roomId = newGrpId;
 
-        resApi.object = newGrpId;
         //Increase the number of users in the room the socket is joining
         count = await increaseUserCount(newGrpId);
         emitUserCountUpdate(newGrpId, count);
 
-        emitJoinGroupResult(resApi);
+        emitJoinGroupResult(resApi, true, newGrpId);
+    })
+
+    socket.on('disconnectFromRoom', () => {
+        socket.disconnect();
     })
 
     socket.on('disconnect', async () => {
@@ -123,11 +117,16 @@ exports.new_socket_conn = io.on('connection', (socket) => {
 
 
     //#region ------------------Socket Emitting functions-----------------------
-    function emitAddGroupResult(resApi) {
+    function emitAddGroupResult(resApi, newGroupId) {
+        resApi.object = newGroupId;
         socket.emit('grpCreated', resApi);
     }
 
-    function emitJoinGroupResult(resApi) {
+    function emitJoinGroupResult(resApi, isValidGroup, newGroupId) {
+        resApi.object = {
+            "isValidGroup": isValidGroup,
+            "groupId": newGroupId
+        }
         socket.emit('joinGrpResult', resApi);
     }
 
