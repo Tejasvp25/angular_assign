@@ -12,8 +12,8 @@ mongoose.Promise = global.Promise
 // mongoose.connect('mongodb://localhost/chatRoomDb', {
 //     useNewUrlParser: true
 // })
-const dbUserName = localConfig.dbUserName
-const dbPassword = localConfig.dbPassword
+const dbUserName = process.env.DB_USERNAME
+const dbPassword = process.env.DB_PASSWORD
 
 mongoose.connect(`mongodb://${dbUserName}:${dbPassword}@ds133187.mlab.com:33187/heroku_c5v2h135`, {
     useNewUrlParser: true
@@ -24,7 +24,8 @@ require('./routers/routes')(app);
 
 const port = process.env.PORT || localConfig.port;
 server.listen(port, function () {
-    console.log(`ChatRoom listening on http://localhost:${port}`);
+    // console.log(`ChatRoom listening on http://localhost:${port}`);
+    console.log(`ChatRoom listening on Port :${port}`);
 });
 
 // Pass route handling to angular
