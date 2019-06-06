@@ -24,6 +24,7 @@
     "appmetrics-zipkin": "^1.0.4",
     "axios": "^0.18.1",
     "body-parser": "^1.17.2",
+    "event-stream": "^4.0.0",
     "express": "^4.16.3",
     "ibm-cloud-env": "^0",
     "log4js": "^3.0.6",
