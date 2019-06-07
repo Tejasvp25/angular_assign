@@ -1,15 +1,21 @@
 import { ChatHistoryResult, ChatHistoryMessage, NewMessage } from './../../Models/ChatModels/chatModels';
 import { SocketService } from './../../Services/socket-service/socket.service';
-import { Component, OnInit, HostListener, ViewChild, ElementRef, TemplateRef, AfterViewInit } from '@angular/core';
+import { Component, OnInit, HostListener, ViewChild, ElementRef, TemplateRef, AfterViewInit, OnDestroy } from '@angular/core';
 import { MessageProp } from 'src/app/Models/ChatModels/chatModels';
 import { ToastrService } from 'ngx-toastr';
 import { FetchService } from 'src/app/Services/fetch-service/fetch.service';
 import { Router } from '@angular/router';
 import { NgbModal, ModalDismissReasons } from '@ng-bootstrap/ng-bootstrap';
 import { isNullOrUndefined } from 'util';
+import { Location } from '@angular/common';
+import { SubscriptionLike, Subscription } from 'rxjs';
 
 export enum KEY_CODE {
   ENTER = 13
+}
+
+export enum CustomModalDismissReasons {
+  LOCATION_CHANGE = 2
 }
 
 @Component({
@@ -17,7 +23,7 @@ export enum KEY_CODE {
   templateUrl: './chat-page.component.html',
   styleUrls: ['./chat-page.component.css']
 })
-export class ChatPageComponent implements OnInit, AfterViewInit {
+export class ChatPageComponent implements OnInit, AfterViewInit, OnDestroy {
 
   closeResult: string;
   messageList: MessageProp[] = [];
@@ -34,6 +40,12 @@ export class ChatPageComponent implements OnInit, AfterViewInit {
   showUserNameModal = true;
   showFriendsInvite = false;
 
+  // ------------------------ Observables ----------------------------
+  locationObs: SubscriptionLike;
+  socketNewMsgObs: Subscription;
+  socketUserCountObs: Subscription;
+  // ------------------------ Observables ----------------------------
+
   @ViewChild('newRoomModal') newRoomModal: TemplateRef<any>;
   @ViewChild('userNameModal') userNameModal: TemplateRef<any>;
 
@@ -41,6 +53,7 @@ export class ChatPageComponent implements OnInit, AfterViewInit {
     public socketService: SocketService,
     private fetchService: FetchService,
     private router: Router,
+    private location: Location,
     private toastrService: ToastrService) { }
 
   ngOnInit() {
@@ -52,6 +65,9 @@ export class ChatPageComponent implements OnInit, AfterViewInit {
       this.navigateToLandingPage();
     }
     this.initSocketListeners();
+    this.locationObs = this.location.subscribe(x => {
+      this.modalService.dismissAll(CustomModalDismissReasons.LOCATION_CHANGE);
+    });
   }
 
   ngAfterViewInit() {
@@ -70,6 +86,27 @@ export class ChatPageComponent implements OnInit, AfterViewInit {
 
   }
 
+  ngOnDestroy(): void {
+    this.locationObs.unsubscribe();
+    this.endSocketSession();
+  }
+
+  // Initialize all socket listeners here
+  public initSocketListeners() {
+    this.onNewMessage();
+    this.onUserCountUpdate();
+  }
+
+  public endSocketSession() {
+    // Unsubscribe all socket listeners here
+    this.socketNewMsgObs.unsubscribe();
+    this.socketUserCountObs.unsubscribe();
+
+    this.socketService.clearCurrentDetails();
+    this.socketService.disconnectFromRoom();
+  }
+
+
   public getChatHistoryAndRoomData() {
     this.fetchService.getChatHistory(this.currentGroupId).subscribe(
       res => {
@@ -77,12 +114,6 @@ export class ChatPageComponent implements OnInit, AfterViewInit {
         this.onChatHistory(res);
       }
     );
-  }
-
-  // Initialize all socket listeners here
-  public initSocketListeners() {
-    this.onNewMessage();
-    this.onUserCountUpdate();
   }
 
   @HostListener('window:keydown', ['$event'])
@@ -97,8 +128,6 @@ export class ChatPageComponent implements OnInit, AfterViewInit {
   public sendMessage() {
     const curMessage = new MessageProp();
     curMessage.message = this.messageInp;
-    // TODO: Get user's name from modal
-    // curMessage.userName = this.username;
     curMessage.userName = this.username;
     curMessage.isSent = true;
 
@@ -127,7 +156,7 @@ export class ChatPageComponent implements OnInit, AfterViewInit {
 
   // Listen for new messages
   public onNewMessage() {
-    this.socketService.onNewMessage().subscribe(res => {
+    this.socketNewMsgObs = this.socketService.onNewMessage().subscribe(res => {
       const newMsg: NewMessage = res;
       const message = newMsg.message;
       const username = newMsg.username;
@@ -138,7 +167,7 @@ export class ChatPageComponent implements OnInit, AfterViewInit {
 
   // Listen for number of active users
   public onUserCountUpdate() {
-    this.socketService.onNumUsersUpdate().subscribe(count => {
+    this.socketUserCountObs = this.socketService.onNumUsersUpdate().subscribe(count => {
       console.log('onNumUsersUpdate:' + count);
       this.numActiveUsers = count;
     });
@@ -157,8 +186,6 @@ export class ChatPageComponent implements OnInit, AfterViewInit {
   }
 
   public navigateToLandingPage() {
-    this.socketService.clearCurrentDetails();
-    this.socketService.disconnectFromRoom();
     this.router.navigateByUrl('/');
   }
 
@@ -185,8 +212,11 @@ export class ChatPageComponent implements OnInit, AfterViewInit {
       this.showUserNameModal = false;
       // this.nicknameInp = '';
     }, (reason) => {
-      this.openUserNameModal();
       this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
+      if (reason === CustomModalDismissReasons.LOCATION_CHANGE) {
+        return;
+      }
+      this.openUserNameModal();
     });
   }
 
@@ -196,6 +226,8 @@ export class ChatPageComponent implements OnInit, AfterViewInit {
       return 'by pressing ESC';
     } else if (reason === ModalDismissReasons.BACKDROP_CLICK) {
       return 'by clicking on a backdrop';
+    } else if (reason === CustomModalDismissReasons.LOCATION_CHANGE) {
+      return 'by changing route location';
     } else {
       return `with: ${reason}`;
     }

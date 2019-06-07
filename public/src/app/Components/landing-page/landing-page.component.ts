@@ -1,6 +1,7 @@
+import { Subscription } from 'rxjs';
 import { ApiReturnEnum } from './../../Models/Enums/ApireturnEnum';
 import { SocketService } from './../../Services/socket-service/socket.service';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { NgbModal, ModalDismissReasons } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { Router } from '@angular/router';
@@ -13,10 +14,14 @@ import { isNullOrUndefined } from 'util';
   templateUrl: './landing-page.component.html',
   styleUrls: ['./landing-page.component.css']
 })
-export class LandingPageComponent implements OnInit {
+export class LandingPageComponent implements OnInit, OnDestroy {
   closeResult: string;
   newRoomName: string;
   joinRoomId: any;
+  isAlertOpen = true;
+
+  socketNewRoomObs: Subscription;
+  socketJoinRoomObs: Subscription;
 
   constructor(private modalService: NgbModal,
     private toastrService: ToastrService,
@@ -26,6 +31,15 @@ export class LandingPageComponent implements OnInit {
 
   ngOnInit() {
     this.initSocketConnection();
+  }
+
+  ngOnDestroy(): void {
+    this.removeSocketListeners();
+  }
+
+  removeSocketListeners() {
+    this.socketNewRoomObs.unsubscribe();
+    this.socketJoinRoomObs.unsubscribe();
   }
 
   createRoom(content) {
@@ -72,7 +86,7 @@ export class LandingPageComponent implements OnInit {
   private initSocketConnection(): void {
     this.socketService.initSocket();
 
-    this.socketService.onRoomCreated().subscribe(res => {
+    this.socketNewRoomObs = this.socketService.onRoomCreated().subscribe(res => {
       this.spinner.hide();
       if (res.retCode === ApiReturnEnum.Successful) {
         this.toastrService.success('Room created successfully');
@@ -87,7 +101,7 @@ export class LandingPageComponent implements OnInit {
       this.toastrService.error('Failed to create room. Please try again later');
     });
 
-    this.socketService.onRoomJoined().subscribe(res => {
+    this.socketJoinRoomObs = this.socketService.onRoomJoined().subscribe(res => {
       this.spinner.hide();
       if (res.retCode === ApiReturnEnum.Successful) {
 

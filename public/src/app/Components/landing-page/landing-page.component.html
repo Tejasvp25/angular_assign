@@ -14,6 +14,11 @@
     </button>
   </div>
 </div>
+<div>
+  <ngb-alert *ngIf="isAlertOpen" (close)="isAlertOpen=false" style="text-align: center">
+    Please don't share any sensitive information as this app is just for experimental purposes
+  </ngb-alert>
+</div>
 
 <!-- Modal -->
 <ng-template #createRoomModal let-modal>
