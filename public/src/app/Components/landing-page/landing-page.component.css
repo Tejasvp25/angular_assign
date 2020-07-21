@@ -35,3 +35,10 @@
     font-size: 35px;
     margin-top: 50px;
 }
+
+.footer{
+    position: fixed;
+    bottom: 0;
+    text-align: center;
+    width: 100%;
+}
