@@ -35,3 +35,8 @@
     font-size: 35px;
     margin-top: 50px;
 }
+
+.footer{
+    position: fixed;
+    bottom: 0;
+}
