@@ -10,11 +10,10 @@ const localConfig = require('./config/headers').localConfig;
 var mongoose = require('mongoose')
 mongoose.Promise = global.Promise
 
-if (process.env.DB_USERNAME) {
-    const dbUserName = process.env.DB_USERNAME
+if (process.env.DB_CONNECTION_STR) {
+    const dbConnStr = process.env.DB_CONNECTION_STR
     const dbPassword = process.env.DB_PASSWORD
-    console.log(`Server:: dbUserName : ${dbUserName}, dbPassword : ${dbPassword}`)
-    mongoose.connect(`mongodb://${dbUserName}:${dbPassword}@ds133187.mlab.com:33187/heroku_c5v2h135`, {
+    mongoose.connect(dbConnStr.replace('<password>', dbPassword), {
         useNewUrlParser: true
     });
 } else {
