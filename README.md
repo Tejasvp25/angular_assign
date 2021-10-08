@@ -2,7 +2,7 @@
 
 A chat app where you can create custom rooms and invite friends to talk with. No sign-in is required and it takes almost no time to get a room set up and running. Just share the unique Id which is generated for the room, with your friends and you are connected within seconds.
 
-To dive right into the app, head to https://chat-room-alpha.herokuapp.com/ :airplane:
+To dive right into the app, head to https://chat-room-alpha.herokuapp.com/
 
 ## Built with
 
