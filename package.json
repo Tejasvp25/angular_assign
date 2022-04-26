@@ -3,10 +3,6 @@
   "version": "1.0.0",
   "description": "A chat application",
   "private": true,
-  "engines": {
-    "node": "^8.11.1",
-    "npm": "6.9.0"
-  },
   "scripts": {
     "start": "node server/server.js",
     "debug": "chmod +x run-debug && ./run-debug",
@@ -26,6 +22,7 @@
     "appmetrics-zipkin": "^1.0.4",
     "axios": "^0.18.1",
     "body-parser": "^1.17.2",
+    "cors": "^2.8.5",
     "event-stream": "^4.0.0",
     "express": "^4.16.3",
     "ibm-cloud-env": "^0",
