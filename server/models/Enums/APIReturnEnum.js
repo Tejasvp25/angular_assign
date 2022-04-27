@@ -1,9 +1,9 @@
 var ApiReturnEnum = {
-    'Successful': 0,
-    'SuccessfulNoContent':1,
-    'ErrorOccured':-1
-}
+  Successful: 0,
+  SuccessfulNoContent: 1,
+  ErrorOccured: -1,
+};
 
-Object.freeze(ApiReturnEnum)
+Object.freeze(ApiReturnEnum);
 
-module.exports = ApiReturnEnum
+module.exports = ApiReturnEnum;

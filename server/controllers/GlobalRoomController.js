@@ -1,53 +1,32 @@
-//#region ---------imports--------------
-var globalRoomRepo = require('../Repo/GlobalRoomRepo')
-//#endregion ---------imports--------------
+const globalRoomRepo = require("../Repo/GlobalRoomRepo");
 
-/**
- * --Structure--
- *Create
- *Load
- *Update
- *Remove
- */
-
-//#region ----------------- Create ----------------------//
 exports.createNewMessage = async (msg, un) => {
-    globalRoomRepo.createNewMessage(msg, un);
-}
-//#endregion -------------- Create ----------------------//
+  globalRoomRepo.createNewMessage(msg, un);
+};
 
-//#region -------------- -- Load ----------------------//
 exports.getChatHist = async (req, res) => {
-    await globalRoomRepo.loadChatHist()
-        .then(repoResult => {
-            res.json(repoResult);
-        })
-}
-
+  await globalRoomRepo.loadChatHist().then((repoResult) => {
+    res.json(repoResult);
+  });
+};
 
 exports.getNumMsgs = async (req, res) => {
-    await globalRoomRepo.loadNumMsgs()
-        .then(repoResult => repoResult[0])
-        .then(repoResult => res.json(repoResult))
-}
-
-//#endregion -------------- Load ----------------------//
-
-//#region ---------------- Update ----------------------//
+  await globalRoomRepo
+    .loadNumMsgs()
+    .then((repoResult) => repoResult[0])
+    .then((repoResult) => res.json(repoResult));
+};
 
 exports.updateUserCount = async (data) => {
-    return globalRoomRepo.updateUserCount(data)
-}
-//#endregion -------------Update ----------------------//
+  return globalRoomRepo.updateUserCount(data);
+};
 
-//#region -------------- Remove ----------------------//
 exports.clearAllMsgs = () => {
-    globRoom.update({}, { messages: [] }, (err, result) => {
-        if (err) {
-            console.log(err)
-            return false
-        }
-        return result;
-    })
-}
-//#endregion -------------- Remove ----------------------//
+  globRoom.update({}, { messages: [] }, (err, result) => {
+    if (err) {
+      console.log(err);
+      return false;
+    }
+    return result;
+  });
+};

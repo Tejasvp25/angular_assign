@@ -5,12 +5,7 @@
   "private": true,
   "scripts": {
     "start": "node server/server.js",
-    "dev": "nodemon server/server.js",
-  },
-  "nodemonConfig": {
-    "env": {
-      "NODE_HEAPDUMP_OPTIONS": "nosignal"
-    }
+    "dev": "nodemon server/server.js"
   },
   "dependencies": {
     "@cloudant/cloudant": "^1.10.0",
