@@ -4,6 +4,8 @@ const ResAPI = require("../Parameters/ResAPI");
 const APIReturnEnum = require("../models/Enums/APIReturnEnum");
 
 exports.new_socket_conn = io.on("connection", (socket) => {
+  console.log("connected");
+
   socket.on("clientMsg", (data) => {
     let curGrpId = socket.roomId;
     emitNewMessage(curGrpId, data);
@@ -22,6 +24,7 @@ exports.new_socket_conn = io.on("connection", (socket) => {
       if (res.retCode === APIReturnEnum.Successful) {
         newGroupId = res.object;
       }
+      console.log("lol");
     });
     emitAddGroupResult(resApi, newGroupId);
     if (res.retCode === APIReturnEnum.ErrorOccured) {
@@ -42,7 +45,6 @@ exports.new_socket_conn = io.on("connection", (socket) => {
     });
 
     if (!isValidGroup || isValidGroup === null || isValidGroup === undefined) {
-      custConsoleLog("Not a valid group");
       emitJoinGroupResult(resApi, false, newGrpId);
       return;
     }
@@ -106,10 +108,8 @@ async function updateUserCount(grpId, adjValue) {
   let curUsers = await groupRoomController
     .getNumUsersInGroup(grpId)
     .catch((err) => {
-      custConsoleLog("Error fetching the number of users");
       return 0;
     });
-  custConsoleLog("Num Users: " + curUsers);
 
   curUsers += adjValue;
   groupRoomController.updateUserCount(grpId, curUsers);

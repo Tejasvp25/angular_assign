@@ -111,7 +111,6 @@ export class LandingPageComponent implements OnInit, OnDestroy {
             "Failed to create room. Please try again later"
           );
         }
-        // TODO Handle onRoomCreate
       },
       (err) => {
         this.toastrService.error(

@@ -2,13 +2,14 @@ var path = require("path");
 
 const app = require("./config/headers").app;
 const server = require("./config/headers").server;
-const localConfig = require("./config/headers").localConfig;
+var socketManager = require("./controllers/SocketController");
 
 var mongoose = require("mongoose");
 mongoose.Promise = global.Promise;
 
 mongoose.connect("mongodb://localhost/chatRoomDb", {
   useNewUrlParser: true,
+  useUnifiedTopology: true,
 });
 
 require("./routers/index")(app, server);
