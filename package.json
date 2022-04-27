@@ -5,10 +5,7 @@
   "private": true,
   "scripts": {
     "start": "node server/server.js",
-    "debug": "chmod +x run-debug && ./run-debug",
-    "test": "nyc mocha",
     "dev": "nodemon server/server.js",
-    "heroku-postbuild": "cd public && npm install && npm run build"
   },
   "nodemonConfig": {
     "env": {
